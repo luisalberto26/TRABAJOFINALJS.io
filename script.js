@@ -28,16 +28,15 @@ rentalForm.addEventListener('submit', async function(event) {
 
         try {
             // Llamada a la API pública de tipos de cambio
-            const response = await fetch('https://er-api.com');
+            const response = await fetch('https://open.er-api.com/v6/latest/USD');
             if (!response.ok) throw new Error('Error de API');
             const data = await response.json();
             
             const eurRate = data.rates.EUR;
             const mxnRate = data.rates.MXN;
 
-            // Estructura del nuevo objeto de alquiler
             const newRental = {
-                id: Date.now(), // ID único para identificarlo
+                id: Date.now(),
                 vehicle: vehicle.toUpperCase(),
                 days: days,
                 usd: totalUSD,
@@ -46,14 +45,12 @@ rentalForm.addEventListener('submit', async function(event) {
                 completed: false
             };
 
-            // Añadir al estado y guardar en LocalStorage
             rentals.push(newRental);
             saveToLocalStorage();
             renderRentals();
 
         } catch (error) {
             console.error("Error cargando API, aplicando fallback", error);
-            // Fallback si falla la red
             const newRental = {
                 id: Date.now(),
                 vehicle: vehicle.toUpperCase(),
@@ -103,13 +100,10 @@ sortSelect.addEventListener('change', renderRentals);
 
 // Función principal para renderizar la lista dinámicamente
 function renderRentals() {
-    // Limpiamos la lista visual antes de repintar
     rentalList.innerHTML = '';
 
-    // Clonamos el array para no mutar el original al ordenar
     let sortedRentals = [...rentals];
 
-    // Aplicar ordenamiento según la selección del filtro
     const sortValue = sortSelect.value;
     if (sortValue === 'price-asc') {
         sortedRentals.sort((a, b) => a.usd - b.usd);
@@ -117,7 +111,6 @@ function renderRentals() {
         sortedRentals.sort((a, b) => b.usd - a.usd);
     }
 
-    // Crear elementos en el DOM mediante bucle
     sortedRentals.forEach(item => {
         const li = document.createElement('li');
         li.classList.add('rental-item');
@@ -140,21 +133,15 @@ function renderRentals() {
         detailsDiv.appendChild(title);
         detailsDiv.appendChild(breakdown);
 
-        // Evento para completar utilizando el ID único
         detailsDiv.addEventListener('click', () => toggleComplete(item.id));
 
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Eliminar';
         deleteBtn.classList.add('delete-btn');
-        
-        // Evento para eliminar utilizando el ID único
         deleteBtn.addEventListener('click', () => deleteRental(item.id));
 
         li.appendChild(detailsDiv);
         li.appendChild(deleteBtn);
         rentalList.appendChild(li);
     });
-}
-    // Añadir el nuevo alquiler a la lista en pantalla
-    rentalList.appendChild(li);
 }
